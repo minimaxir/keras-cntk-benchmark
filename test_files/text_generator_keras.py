@@ -40,7 +40,7 @@ class EpochStatsLogger(Callback):
 logger = EpochStatsLogger()
 
 embeddings_path = "glove.840B.300d-char.txt"
-embedding_dim = 100
+embedding_dim = 300
 batch_size = 128
 use_pca = False
 lr = 0.001
@@ -95,11 +95,11 @@ hidden_1 = Dense(512, use_bias=False)(rnn)
 hidden_1 = BatchNormalization()(hidden_1)
 hidden_1 = Activation('relu')(hidden_1)
 
-hidden_2 = Dense(256, use_bias=False)(rnn)
+hidden_2 = Dense(256, use_bias=False)(hidden_1)
 hidden_2 = BatchNormalization()(hidden_2)
 hidden_2 = Activation('relu')(hidden_2)
 
-main_output = Dense(len(chars))(hidden_1)
+main_output = Dense(len(chars))(hidden_2)
 main_output = Activation('softmax', name='main_out')(main_output)
 
 model = Model(inputs=main_input, outputs=[main_output, aux_output])
