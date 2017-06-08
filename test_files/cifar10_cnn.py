@@ -21,7 +21,7 @@ logger = EpochStatsLogger()
 
 batch_size = 32
 num_classes = 10
-epochs = 200
+epochs = 20
 data_augmentation = True
 
 # The data, shuffled and split between train and test sets:

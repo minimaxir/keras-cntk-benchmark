@@ -40,13 +40,13 @@ class EpochStatsLogger(Callback):
 logger = EpochStatsLogger()
 
 embeddings_path = "glove.840B.300d-char.txt"
-embedding_dim = 20
+embedding_dim = 100
 batch_size = 128
 use_pca = False
 lr = 0.001
 lr_decay = 1e-4
 maxlen = 40
-consume_less = 0   # 0 for cpu, 2 for gpu
+consume_less = 2   # 0 for cpu, 2 for gpu
 
 path = get_file('nietzsche.txt', origin='https://s3.amazonaws.com/text-datasets/nietzsche.txt')
 text = open(path).read().lower()
@@ -85,7 +85,7 @@ embedding_layer = Embedding(
 embedded = embedding_layer(main_input)
 
 # RNN Layer
-rnn = LSTM(32, implementation=consume_less)(embedded)
+rnn = LSTM(128, implementation=consume_less)(embedded)
 
 aux_output = Dense(len(chars))(rnn)
 aux_output = Activation('softmax', name='aux_out')(aux_output)
@@ -128,7 +128,7 @@ for iteration in [1]:
     print('Iteration', iteration)
 
     model.fit(X, [y, y], batch_size=batch_size,
-                        epochs=1, callbacks=[logger])
+                        epochs=10, callbacks=[logger])
 
     start_index = random.randint(0, len(text) - maxlen - 1)
 
