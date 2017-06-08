@@ -10,6 +10,7 @@ library(ggplot2)
 library(plotly)
 library(boot)
 library(scales)
+library(tidyr)
 ```
 
 ```{r}
@@ -59,4 +60,38 @@ plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
 plot
 plot %>% ggplotly()
 ```
+
+### Speed
+
+```{r}
+df_speed <- df %>% group_by(framework) %>%
+  do({
+    boot <- boot.ci(boot(., elapsed_mean, 1000), type="bca")$bca
+    data.frame(
+      mean = mean(.$elapsed),
+      low_ci = boot[4],
+      high_ci = boot[5]
+    )
+    }) %>%
+  ungroup() %>%
+  mutate(framework = factor(framework))
+
+df_speed
+```
+
+
+```{r}
+plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
+          geom_bar(stat="identity", width=0.5) +
+          geom_errorbar(width = 0.25) +
+          #coord_flip() +
+          theme_minimal(base_family="Source Sans Pro") +
+          labs(title = "Speed of Bidirectional LSTM Approach on IMDb Data",
+               x = "Keras Backend",
+               y = "Average Elapsed Time per Epoch (seconds)")
+
+plot
+plot %>% ggplotly(tooltip=c("x", "y"))
+```
+
 
