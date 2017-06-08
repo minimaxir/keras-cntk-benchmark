@@ -13,8 +13,9 @@ from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 
-from EpochStatsLogger import *
+from CustomCallback import EpochStatsLogger
 logger = EpochStatsLogger()
+
 
 batch_size = 128
 num_classes = 10

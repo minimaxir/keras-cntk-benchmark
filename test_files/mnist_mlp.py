@@ -13,7 +13,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import RMSprop
 
-from EpochStatsLogger import *
+from CustomCallback import EpochStatsLogger
 logger = EpochStatsLogger()
 
 
