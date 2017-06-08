@@ -1,0 +1,62 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(boot)
+library(scales)
+```
+
+```{r}
+file_path <- "/Users/maxwoolf/Dropbox/PythonProjects/keras-cntk-benchmark/logs/"
+```
+
+# IMDb
+
+## imdb_bidirectional_lstm
+
+```{r}
+df_imdb_bi_cntk <- read_csv(paste0(file_path, "imdb_bidirectional_lstm_cntk.csv"))
+df_imdb_bi_tf <- read_csv(paste0(file_path, "imdb_bidirectional_lstm_tensorflow.csv"))
+```
+
+
+```{r}
+elapsed_mean <- function(data, indices){
+  d <- data[indices,]
+  mean(d$elapsed)
+}
+
+(df_imdb_bi_cntk %>% boot(elapsed_mean, 1000) %>% boot.ci(type="bca"))$bca[4:5]
+```
+
+### Test Acc
+
+```{r}
+df <- df_imdb_bi_cntk %>% mutate(framework = 'CNTK', epoch = epoch + 1) %>% union(
+        df_imdb_bi_tf %>% mutate(framework = 'TensorFlow', epoch = epoch + 1)
+)
+
+df
+```
+
+
+```{r}
+plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
+          geom_line() +
+          geom_point(size=2) + 
+          theme_minimal(base_family="Source Sans Pro") +
+          scale_y_continuous(labels = percent) +
+          labs(title = "Performance of Bidirectional LSTM Approach on IMDb Data",
+               x = "Epoch",
+               y = "Test Accuracy (Higher is Better)")
+
+plot
+plot %>% ggplotly()
+```
+
