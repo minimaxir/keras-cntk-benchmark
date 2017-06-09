@@ -312,3 +312,212 @@ plot %>% ggplotly(tooltip=c("x", "y"))
 ```
 
 CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
+
+# CIFAR:
+
+## CNN
+
+
+```{r}
+df_cifar_cnn_cntk <- read_csv(paste0(file_path, "cifar10_cnn_cntk.csv"))
+df_cifar_cnn_tf <- read_csv(paste0(file_path, "cifar10_cnn_tensorflow.csv"))
+```
+
+### Test Acc
+
+```{r}
+df <- df_cifar_cnn_cntk %>% mutate(framework = 'CNTK', epoch = epoch + 1) %>% union(
+        df_cifar_cnn_tf %>% mutate(framework = 'TensorFlow', epoch = epoch + 1)
+)
+
+df
+```
+
+
+```{r}
+plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
+          geom_line() +
+          geom_point(size=2) + 
+          theme_minimal(base_family="Source Sans Pro") +
+          scale_y_continuous(labels = percent) +
+          scale_color_manual(values=framework_colors) +
+          labs(title = "Performance of CNN Approach on CIFAR Data",
+               x = "Epoch",
+               y = "Test Accuracy (Higher is Better)",
+               color="")
+
+plot %>% ggplotly()
+```
+
+### Speed
+
+```{r}
+df_speed <- df %>% group_by(framework) %>%
+  do({
+    boot <- boot.ci(boot(., elapsed_mean, 1000), type="bca")$bca
+    data.frame(
+      mean = mean(.$elapsed),
+      low_ci = boot[4],
+      high_ci = boot[5]
+    )
+    }) %>%
+  ungroup() %>%
+  mutate(framework = factor(framework))
+
+df_speed
+```
+
+
+```{r}
+plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
+          geom_bar(stat="identity", width=0.5) +
+          geom_errorbar(width = 0.25) +
+          theme_minimal(base_family="Source Sans Pro") +
+          scale_fill_manual(values=framework_colors) +
+          labs(title = "Speed of CNN Approach on CIFAR Data",
+               x = "Keras Backend",
+               y = "Average Runtime per Epoch (seconds)",
+               fill = "")
+
+plot %>% ggplotly(tooltip=c("x", "y"))
+```
+
+CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
+
+# Text Generation
+
+## CNN
+
+
+```{r}
+df_gen_lstm_cntk <- read_csv(paste0(file_path, "lstm_text_generation_cntk.csv"))
+df_gen_lstm_tf <- read_csv(paste0(file_path, "lstm_text_generation_tensorflow.csv"))
+```
+
+### Test Acc
+
+```{r}
+df <- df_gen_lstm_cntk %>% mutate(framework = 'CNTK', epoch = epoch + 1) %>% union(
+        df_gen_lstm_tf %>% mutate(framework = 'TensorFlow', epoch = epoch + 1)
+)
+
+df
+```
+
+
+```{r}
+plot <- ggplot(df, aes(epoch, loss, color=framework)) +
+          geom_line() +
+          geom_point(size=2) + 
+          theme_minimal(base_family="Source Sans Pro") +
+          scale_color_manual(values=framework_colors) +
+          labs(title = "Performance of Text Generation via LSTM",
+               x = "Epoch",
+               y = "Loss (Lower is Better)",
+               color="")
+
+plot %>% ggplotly()
+```
+
+### Speed
+
+```{r}
+df_speed <- df %>% group_by(framework) %>%
+  do({
+    boot <- boot.ci(boot(., elapsed_mean, 1000), type="bca")$bca
+    data.frame(
+      mean = mean(.$elapsed),
+      low_ci = boot[4],
+      high_ci = boot[5]
+    )
+    }) %>%
+  ungroup() %>%
+  mutate(framework = factor(framework))
+
+df_speed
+```
+
+
+```{r}
+plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
+          geom_bar(stat="identity", width=0.5) +
+          geom_errorbar(width = 0.25) +
+          theme_minimal(base_family="Source Sans Pro") +
+          scale_fill_manual(values=framework_colors) +
+          labs(title = "Speed of CNN of Text Generation via LSTM",
+               x = "Keras Backend",
+               y = "Average Runtime per Epoch (seconds)",
+               fill = "")
+
+plot %>% ggplotly(tooltip=c("x", "y"))
+```
+
+CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
+
+## Custom Keras
+
+
+```{r}
+df_gen_keras_cntk <- read_csv(paste0(file_path, "text_generator_keras_cntk.csv"))
+df_gen_keras_tf <- read_csv(paste0(file_path, "text_generator_keras_tensorflow.csv"))
+```
+
+### Test Acc
+
+```{r}
+df <- df_gen_keras_cntk %>% mutate(framework = 'CNTK', epoch = epoch + 1) %>% union(
+        df_gen_keras_tf %>% mutate(framework = 'TensorFlow', epoch = epoch + 1)
+)
+
+df
+```
+
+
+```{r}
+plot <- ggplot(df, aes(epoch, loss, color=framework)) +
+          geom_line() +
+          geom_point(size=2) + 
+          theme_minimal(base_family="Source Sans Pro") +
+          scale_color_manual(values=framework_colors) +
+          labs(title = "Performance of Text Generation via Custom Keras Model",
+               x = "Epoch",
+               y = "Loss (Lower is Better)",
+               color="")
+
+plot %>% ggplotly()
+```
+
+### Speed
+
+```{r}
+df_speed <- df %>% group_by(framework) %>%
+  do({
+    boot <- boot.ci(boot(., elapsed_mean, 1000), type="bca")$bca
+    data.frame(
+      mean = mean(.$elapsed),
+      low_ci = boot[4],
+      high_ci = boot[5]
+    )
+    }) %>%
+  ungroup() %>%
+  mutate(framework = factor(framework))
+
+df_speed
+```
+
+
+```{r}
+plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
+          geom_bar(stat="identity", width=0.5) +
+          geom_errorbar(width = 0.25) +
+          theme_minimal(base_family="Source Sans Pro") +
+          scale_fill_manual(values=framework_colors) +
+          labs(title = "Speed of Text Generation via Custom Keras Model",
+               x = "Keras Backend",
+               y = "Average Runtime per Epoch (seconds)",
+               fill = "")
+
+plot %>% ggplotly(tooltip=c("x", "y"))
+```
+
+CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
