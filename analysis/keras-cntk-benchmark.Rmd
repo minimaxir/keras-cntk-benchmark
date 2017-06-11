@@ -1,22 +1,38 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "Benchmarking CNTK on Keras: is it Better at Deep Learning than TensorFlow?"
+author: "Max Woolf (@minimaxir)"
+date: "2017-06-12"
+output:
+  html_notebook:
+    highlight: tango
+    mathjax: null
+    number_sections: yes
+    theme: spacelab
+    toc: yes
+    toc_float: yes
 ---
 
-```{r setup}
+This R Notebook is the complement to my blog post [Benchmarking CNTK on Keras: is it Better at Deep Learning than TensorFlow?](http://minimaxir.com/2017/06/keras-cntk/).
+
+This notebook is licensed under the MIT License. If you use the code or data visualization designs contained within this notebook, it would be greatly appreciated if proper attribution is given back to this notebook and/or myself. Thanks! :)
+
+```{r}
 library(readr)
 library(dplyr)
 library(ggplot2)
 library(plotly)
 library(boot)
 library(scales)
-library(tidyr)
+library(htmlwidgets)
+
+sessionInfo()
 ```
 
 ```{r}
 file_path <- "/Users/maxwoolf/Dropbox/PythonProjects/keras-cntk-benchmark/logs/"
 ```
 
+CNTK is blue, TensorFlow is red.
 
 ```{r}
 framework_colors <- c(CNTK="#2980b9",TensorFlow="#c0392b")
@@ -57,7 +73,7 @@ df
 plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
           geom_line() +
           geom_point(size=2) + 
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_y_continuous(labels = percent) +
           scale_color_manual(values=framework_colors) +
           labs(title = "Performance of Bidirectional LSTM Approach on IMDb Data",
@@ -66,7 +82,9 @@ plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
                color = "")
 
 plot
-plot %>% ggplotly(width="100%")
+plot %>% ggplotly(width="100%", height=400)
+plot %>% ggplotly(width="100%", height=400) %>%
+    saveWidget("keras-1.html", selfcontained=F, libdir="plotly")
 ```
 
 ### Speed
@@ -91,19 +109,26 @@ df_speed
 ```{r}
 plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
           geom_bar(stat="identity", width=0.25) +
-          geom_errorbar(width = 0.125) +
-          theme_minimal(base_family="Source Sans Pro") +
+          geom_errorbar(width = 0.25) +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_fill_manual(values=framework_colors) +
           labs(title = "Speed of Bidirectional LSTM Approach on IMDb Data",
                x = "Keras Backend",
-               y = "Average Runtime per Epoch (seconds)",
+               y = "Average Epoch Runtime (seconds)",
                fill = "")
 
 plot
 plot %>% ggplotly(tooltip=c("x", "y"), width="100%")
+plot %>% ggplotly(tooltip=c("x", "y"), width="100%", height=400) %>%
+    saveWidget("keras-2.html", selfcontained=F, libdir="plotly")
 ```
 
-CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
+```{r}
+speed_imdb_bi = (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)
+```
+
+
+CNTK runs at  **`r speed_imdb_bi`**x the runtime of TensorFlow.
 
 ## FastText
 
@@ -128,7 +153,7 @@ df
 plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
           geom_line() +
           geom_point(size=2) + 
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_y_continuous(labels = percent) +
           scale_color_manual(values=framework_colors) +
           labs(title = "Performance of fasttext Approach on IMDb Data",
@@ -137,6 +162,8 @@ plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
                color= "")
 
 plot %>% ggplotly()
+plot %>% ggplotly(width="100%", height=400) %>%
+    saveWidget("keras-3.html", selfcontained=F, libdir="plotly")
 ```
 
 ### Speed
@@ -162,17 +189,24 @@ df_speed
 plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
           geom_bar(stat="identity", width=0.5) +
           geom_errorbar(width = 0.25) +
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_fill_manual(values=framework_colors) +
           labs(title = "Speed of fasttext Approach on IMDb Data",
                x = "Keras Backend",
-               y = "Average Runtime per Epoch (seconds)",
+               y = "Average Epoch Runtime (seconds)",
                fill="")
 
 plot %>% ggplotly(tooltip=c("x", "y"))
+plot %>% ggplotly(tooltip=c("x", "y"), width="100%", height=400) %>%
+    saveWidget("keras-4.html", selfcontained=F, libdir="plotly")
 ```
 
-CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
+```{r}
+speed_imdb_fasttext = (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)
+```
+
+
+CNTK runs at  **`r speed_imdb_fasttext`**x the runtime of TensorFlow.
 
 # MNIST
 
@@ -198,7 +232,7 @@ df
 plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
           geom_line() +
           geom_point(size=2) + 
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_color_manual(values=framework_colors) +
           scale_y_continuous(labels = percent) +
           labs(title = "Performance of MLP Approach on MNIST Data",
@@ -207,6 +241,8 @@ plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
                color="")
 
 plot %>% ggplotly()
+plot %>% ggplotly(width="100%", height=400) %>%
+    saveWidget("keras-5.html", selfcontained=F, libdir="plotly")
 ```
 
 ### Speed
@@ -232,17 +268,23 @@ df_speed
 plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
           geom_bar(stat="identity", width=0.5) +
           geom_errorbar(width = 0.25) +
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_fill_manual(values=framework_colors) +
           labs(title = "Speed of MLP Approach on MNIST Data",
                x = "Keras Backend",
-               y = "Average Runtine per Epoch (seconds)",
+               y = "Average Epoch Runtime (seconds)",
                fill="")
 
 plot %>% ggplotly(tooltip=c("x", "y"))
+plot %>% ggplotly(tooltip=c("x", "y"), width="100%", height=400) %>%
+    saveWidget("keras-6.html", selfcontained=F, libdir="plotly")
 ```
 
-CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
+```{r}
+speed_mnist_mlp = (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)
+```
+
+CNTK runs at  **`r speed_mnist_mlp`**x the runtime of TensorFlow.
 
 ## CNN
 
@@ -267,7 +309,7 @@ df
 plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
           geom_line() +
           geom_point(size=2) + 
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_y_continuous(labels = percent) +
           scale_color_manual(values=framework_colors) +
           labs(title = "Performance of CNN Approach on MNIST Data",
@@ -276,6 +318,8 @@ plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
                color="")
 
 plot %>% ggplotly()
+plot %>% ggplotly(width="100%", height=400) %>%
+    saveWidget("keras-7.html", selfcontained=F, libdir="plotly")
 ```
 
 ### Speed
@@ -301,17 +345,24 @@ df_speed
 plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
           geom_bar(stat="identity", width=0.5) +
           geom_errorbar(width = 0.25) +
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_fill_manual(values=framework_colors) +
           labs(title = "Speed of CNN Approach on MNIST Data",
                x = "Keras Backend",
-               y = "Average Runtime per Epoch (seconds)",
+               y = "Average Epoch Runtime (seconds)",
                fill = "")
 
 plot %>% ggplotly(tooltip=c("x", "y"))
+plot %>% ggplotly(tooltip=c("x", "y"), width="100%", height=400) %>%
+    saveWidget("keras-8.html", selfcontained=F, libdir="plotly")
 ```
 
-CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
+
+```{r}
+speed_mnist_cnn = (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)
+```
+
+CNTK runs at  **`r speed_mnist_cnn`**x the runtime of TensorFlow.
 
 # CIFAR:
 
@@ -338,15 +389,17 @@ df
 plot <- ggplot(df, aes(epoch, val_acc, color=framework)) +
           geom_line() +
           geom_point(size=2) + 
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_y_continuous(labels = percent) +
           scale_color_manual(values=framework_colors) +
-          labs(title = "Performance of CNN Approach on CIFAR Data",
+          labs(title = "Performance of CNN Approach on CIFAR-10 Data",
                x = "Epoch",
                y = "Test Accuracy (Higher is Better)",
                color="")
 
 plot %>% ggplotly()
+plot %>% ggplotly(width="100%", height=400) %>%
+    saveWidget("keras-9.html", selfcontained=F, libdir="plotly")
 ```
 
 ### Speed
@@ -372,17 +425,23 @@ df_speed
 plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
           geom_bar(stat="identity", width=0.5) +
           geom_errorbar(width = 0.25) +
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_fill_manual(values=framework_colors) +
-          labs(title = "Speed of CNN Approach on CIFAR Data",
+          labs(title = "Speed of CNN Approach on CIFAR-10 Data",
                x = "Keras Backend",
-               y = "Average Runtime per Epoch (seconds)",
+               y = "Average Epoch Runtime (seconds)",
                fill = "")
 
 plot %>% ggplotly(tooltip=c("x", "y"))
+plot %>% ggplotly(tooltip=c("x", "y"), width="100%", height=400) %>%
+    saveWidget("keras-10.html", selfcontained=F, libdir="plotly")
 ```
 
-CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
+```{r}
+speed_cifar_cnn = (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)
+```
+
+CNTK runs at  **`r speed_cifar_cnn`**x the runtime of TensorFlow.; not statistically significant
 
 # Text Generation
 
@@ -409,7 +468,7 @@ df
 plot <- ggplot(df, aes(epoch, loss, color=framework)) +
           geom_line() +
           geom_point(size=2) + 
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_color_manual(values=framework_colors) +
           labs(title = "Performance of Text Generation via LSTM",
                x = "Epoch",
@@ -417,6 +476,8 @@ plot <- ggplot(df, aes(epoch, loss, color=framework)) +
                color="")
 
 plot %>% ggplotly()
+plot %>% ggplotly(width="100%", height=400) %>%
+    saveWidget("keras-11.html", selfcontained=F, libdir="plotly")
 ```
 
 ### Speed
@@ -442,17 +503,23 @@ df_speed
 plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
           geom_bar(stat="identity", width=0.5) +
           geom_errorbar(width = 0.25) +
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_fill_manual(values=framework_colors) +
           labs(title = "Speed of CNN of Text Generation via LSTM",
                x = "Keras Backend",
-               y = "Average Runtime per Epoch (seconds)",
+               y = "Average Epoch Runtime (seconds)",
                fill = "")
 
 plot %>% ggplotly(tooltip=c("x", "y"))
+plot %>% ggplotly(tooltip=c("x", "y"), width="100%", height=400) %>%
+    saveWidget("keras-12.html", selfcontained=F, libdir="plotly")
 ```
 
-CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
+```{r}
+speed_lstm_gen = (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)
+```
+
+CNTK runs at  **`r speed_lstm_gen`**x the runtime of TensorFlow.
 
 ## Custom Keras
 
@@ -477,7 +544,7 @@ df
 plot <- ggplot(df, aes(epoch, loss, color=framework)) +
           geom_line() +
           geom_point(size=2) + 
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_color_manual(values=framework_colors) +
           labs(title = "Performance of Text Generation via Custom Keras Model",
                x = "Epoch",
@@ -485,6 +552,8 @@ plot <- ggplot(df, aes(epoch, loss, color=framework)) +
                color="")
 
 plot %>% ggplotly()
+plot %>% ggplotly(width="100%", height=400) %>%
+    saveWidget("keras-13.html", selfcontained=F, libdir="plotly")
 ```
 
 ### Speed
@@ -510,14 +579,44 @@ df_speed
 plot <- ggplot(df_speed, aes(x=framework, y=mean, ymin=low_ci, ymax=high_ci, fill=framework)) +
           geom_bar(stat="identity", width=0.5) +
           geom_errorbar(width = 0.25) +
-          theme_minimal(base_family="Source Sans Pro") +
+          theme_minimal(base_family="Source Sans Pro", base_size=14) +
           scale_fill_manual(values=framework_colors) +
           labs(title = "Speed of Text Generation via Custom Keras Model",
                x = "Keras Backend",
-               y = "Average Runtime per Epoch (seconds)",
+               y = "Average Epoch Runtime (seconds)",
                fill = "")
 
 plot %>% ggplotly(tooltip=c("x", "y"))
+plot %>% ggplotly(tooltip=c("x", "y"), width="100%", height=400) %>%
+    saveWidget("keras-14.html", selfcontained=F, libdir="plotly")
 ```
 
-CNTK is **`r (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)`**x the speed of TensorFlow.
+```{r}
+speed_keras_gen = (df_speed$mean[2] / df_speed$mean[1]) %>% round(2)
+```
+
+CNTK runs at  **`r speed_keras_gen`**x the runtime of TensorFlow.
+
+## LICENSE
+
+MIT License
+
+Copyright (c) 2017 Max Woolf
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
